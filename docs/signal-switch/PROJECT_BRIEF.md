@@ -1,6 +1,6 @@
 # Signal Switch — brief e checkpoint inicial
 
-Data: 2026-10-21. Estado: **identidade própria em implementação; não compilado/instalado; sem migração de código SignalRout**.
+Data: 2026-10-21. Estado: **identidade própria compilada e instalada localmente no Linux; integração dos provedores não validada; sem migração do SignalRout**.
 
 ## Missão
 
@@ -84,7 +84,7 @@ Fontes consultadas:
 
 1. Fork autenticado criado na conta `LuigiAPCPereira`; a publicação de branch/commit local requer verificação separada.
 2. SignalRout não está no workspace conectado; **nenhuma implementação foi migrada**.
-3. CI, build, OAuth real, SSE e benchmarks **não executados** nesta etapa.
+3. Build Release e smoke GUI validados em 2026-10-22. CI, OAuth real, SSE, testes Rust completos e benchmarks **não executados/confirmados**.
 
 ## Próxima fatia exata
 
@@ -97,7 +97,7 @@ Recuperar o SignalRout em fonte durável e comparar um único fluxo crítico (pr
 - Auto-updater upstream desabilitado, sem chave do fork: atualização manual até configurar assinatura e feed próprios. O painel de update poderá informar indisponibilidade.
 - Sync remoto default: `signal-switch-sync`, evitando compartilhamento acidental do remote root do CC Switch.
 - Ícones e textos legados ainda podem representar o CC Switch; rebranding gráfico é fase posterior. Nenhuma migração automática de `~/.cc-switch`.
-- Integração de releases Linux pendente de build/validação no host; não publicar artefatos antes de validar dependências e startup.
+- Build Release Linux e smoke de startup concluídos em 2026-10-22. Distribuição empacotada, testes profundos e upstream CI ainda pendentes; não publicar release antes dos gates completos.
 
 ## Checkpoint de validação — 2026-10-22
 
@@ -107,3 +107,13 @@ Recuperar o SignalRout em fonte durável e comparar um único fluxo crítico (pr
 - Compilação Release iniciada em `fish -lc 'pnpm tauri build --no-bundle'`; log de compilação no host: `/tmp/signal-switch-release-build.log`, sessão da ferramenta: `29390`. O término, resultado de compilação Rust, testes Rust e instalação **não estavam confirmados** no momento deste registro.
 - **Não iniciar aplicativo em conjunto com CC Switch** sem revisar a escrita compartilhada das configurações de clientes Claude/Codex. Dados privados Signal Switch separados, mas os CLIs permanecem recursos externos compartilhados por projeto.
 - Próxima ação exata: reconciliar o estado do build Release na sessão/log, corrigir se houver erro, validar binário e fazer smoke test antes de instalar desktop entry local. Não supor que a sessão de build continua viva entre conversas.
+
+## Entrega local Linux — 2026-10-22
+
+- Build observado: `pnpm tauri build --no-bundle` terminou com sucesso, gerou `src-tauri/target/release/signal-switch`, 41.134.672 bytes (SHA-256 `d4a27664037079400a01c5cffbfb7929a27d7dfe022a46806a7527eaf0b905de`).
+- Smoke test em `HOME` e XDG temporários: aplicação iniciou janela principal em KDE/Wayland, criou `~/.signal-switch/signal-switch.db` **apenas dentro do home de teste**, inicializou as tabelas e foi encerrada intencionalmente pelo timeout depois de 18 s. Saída `124` é timeout, não crash; um warning não fatal de dimensões da janela em Wayland.
+- Instalação **sem sudo** para usuário: binário copiado a `~/.local/opt/signal-switch/signal-switch`, symlink `~/.local/bin/signal-switch`, launcher em `~/.local/share/applications/signal-switch.desktop` (`Icon=applications-development` temporário). SHA do executável instalado igual ao compilado. `desktop-file-validate` passou e `fish -lc 'command -s signal-switch'` reconheceu o comando.
+- Uma instância gráfica do executável instalado apareceu posteriormente na sessão real; em seu log local houve 81 registros INFO e um WARN gráfico, **sem ERROR**. O programa criou `~/.signal-switch/` com banco próprio; a pasta `~/.cc-switch` preexistente não foi renomeada. Não foi feita manipulação ativa das configurações de Claude/Codex, mas **não há auditoria de todos os arquivos externos acessados**.
+- Autoatualização da origem permanece removida; eventual painel de atualizações exibirá indisponibilidade. A identidade visual ainda contém componentes herdados do CC Switch. Instalação é local/manual e **não** constitui Release GitHub ou pacote assinado.
+- Rollback da instalação local (sem apagar dados): encerrar normalmente a instância do Signal Switch; remover somente `~/.local/bin/signal-switch`, `~/.local/share/applications/signal-switch.desktop` e `~/.local/opt/signal-switch/`. Preservar `~/.signal-switch/` para eventual migração. Nunca apagar `~/.cc-switch/` ou diretórios dos CLIs.
+- Próxima fatia recomendada: revisar comportamento de primeira execução e configurações externas, acrescentar gates Rust/GUI com dados isolados e só depois habilitar configuração real de provedores e preparar pacote de Release próprio.
