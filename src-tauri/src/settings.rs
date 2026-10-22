@@ -113,7 +113,7 @@ pub struct WebDavSyncStatus {
 }
 
 fn default_remote_root() -> String {
-    "cc-switch-sync".to_string()
+    "signal-switch-sync".to_string()
 }
 fn default_profile() -> String {
     "default".to_string()
@@ -702,7 +702,7 @@ impl AppSettings {
         // settings.json 保留用于旧版本迁移和无数据库场景
         Some(
             crate::config::get_home_dir()
-                .join(".cc-switch")
+                .join(".signal-switch")
                 .join("settings.json"),
         )
     }

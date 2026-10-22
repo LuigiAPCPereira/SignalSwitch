@@ -19,9 +19,11 @@ pub fn parse_deeplink_url(url_str: &str) -> Result<DeepLinkImportRequest, AppErr
 
     // Validate scheme
     let scheme = url.scheme();
-    if scheme != "ccswitch" {
+    // Legacy URLs remain importable explicitly, but only signalswitch:// is
+    // registered with the host; never claim the upstream URL handler.
+    if scheme != "ccswitch" && scheme != "signalswitch" {
         return Err(AppError::InvalidInput(format!(
-            "Invalid scheme: expected 'ccswitch', got '{scheme}'"
+            "Invalid scheme: expected 'signalswitch' or 'ccswitch', got '{scheme}'"
         )));
     }
 

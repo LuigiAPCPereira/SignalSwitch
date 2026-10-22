@@ -315,7 +315,7 @@ pub fn get_app_config_dir() -> PathBuf {
         return custom;
     }
 
-    let default_dir = get_home_dir().join(".cc-switch");
+    let default_dir = get_home_dir().join(".signal-switch");
 
     // 兼容 v3.10.3：当用户环境存在 `HOME` 且与真实用户目录不同，
     // v3.10.3 可能在 `HOME/.cc-switch/` 下创建/使用了数据库。
@@ -333,13 +333,13 @@ pub fn get_app_config_dir() -> PathBuf {
 
     #[cfg(windows)]
     {
-        let default_db = default_dir.join("cc-switch.db");
+        let default_db = default_dir.join("signal-switch.db");
         if !default_db.exists() {
             if let Ok(home_env) = std::env::var("HOME") {
                 let trimmed = home_env.trim();
                 if !trimmed.is_empty() {
-                    let legacy_dir = PathBuf::from(trimmed).join(".cc-switch");
-                    if legacy_dir.join("cc-switch.db").exists() {
+                    let legacy_dir = PathBuf::from(trimmed).join(".signal-switch");
+                    if legacy_dir.join("signal-switch.db").exists() {
                         log::info!(
                             "Detected v3.10.3 legacy database at {}, using it instead of {}",
                             legacy_dir.display(),
@@ -1023,9 +1023,9 @@ mod tests {
 
         // 假装 HOME 指向另一处，并且那里有一份 db——正是会触发回退的形状
         let legacy_home = tempfile::tempdir().expect("tempdir");
-        let legacy_dir = legacy_home.path().join(".cc-switch");
+        let legacy_dir = legacy_home.path().join(".signal-switch");
         std::fs::create_dir_all(&legacy_dir).expect("create legacy dir");
-        std::fs::write(legacy_dir.join("cc-switch.db"), b"legacy").expect("seed legacy db");
+        std::fs::write(legacy_dir.join("signal-switch.db"), b"legacy").expect("seed legacy db");
 
         let test_home = tempfile::tempdir().expect("tempdir");
         let saved_home = std::env::var_os("HOME");
@@ -1045,7 +1045,7 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
 
-        let expected = test_home.path().join(".cc-switch");
+        let expected = test_home.path().join(".signal-switch");
         assert_eq!(
             dir, expected,
             "测试 home 优先：不得回退到 HOME 下的旧库目录"

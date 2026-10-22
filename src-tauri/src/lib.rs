@@ -271,7 +271,7 @@ fn handle_deeplink_url(
     focus_main_window: bool,
     source: &str,
 ) -> bool {
-    if !url_str.starts_with("ccswitch://") {
+    if !url_str.starts_with("signalswitch://") {
         return false;
     }
 
@@ -547,7 +547,7 @@ pub fn run() {
                             Target::new(TargetKind::Stdout),
                             Target::new(TargetKind::Folder {
                                 path: log_dir,
-                                file_name: Some("cc-switch".into()),
+                                file_name: Some("signal-switch".into()),
                             }),
                         ])
                         // KeepSome(4) 保留 4 个轮转归档，加上当前文件最多约 100 MiB。
@@ -560,7 +560,7 @@ pub fn run() {
 
                 // 用户配置存在数据库中，数据库尚未打开时使用保守的 Info 级别。
                 log::set_max_level(log::LevelFilter::Info);
-                log::info!("=== CC Switch v{} started ===", env!("CARGO_PKG_VERSION"));
+                log::info!("=== Signal Switch v{} started ===", env!("CARGO_PKG_VERSION"));
             }
 
             #[cfg(unix)]
@@ -573,17 +573,8 @@ pub fn run() {
             #[cfg(target_os = "windows")]
             set_windows_app_user_model_id(app.handle());
 
-            // 注册 Updater 插件（桌面端）；放在 logger 之后，确保失败可诊断。
-            #[cfg(desktop)]
-            {
-                if let Err(e) = app
-                    .handle()
-                    .plugin(tauri_plugin_updater::Builder::new().build())
-                {
-                    // 若配置不完整（如缺少 pubkey），跳过 Updater 而不中断应用
-                    log::warn!("初始化 Updater 插件失败，已跳过：{e}");
-                }
-            }
+            // Signal Switch does not load the upstream updater. Distribution and
+            // signing keys must be owned by this fork before enabling updates.
 
             // 注入 AppHandle 给 usage_events，让无 AppHandle 持有的写日志路径
             // 也能向前端推送 `usage-log-recorded`。
@@ -592,7 +583,7 @@ pub fn run() {
 
             // 初始化数据库
             let app_config_dir = crate::config::get_app_config_dir();
-            let db_path = app_config_dir.join("cc-switch.db");
+            let db_path = app_config_dir.join("signal-switch.db");
             let json_path = app_config_dir.join("config.json");
 
             // 检查是否需要从 config.json 迁移到 SQLite
@@ -1123,7 +1114,7 @@ pub fn run() {
                     let should_register = app
                         .path()
                         .data_dir()
-                        .map(|d| !d.join("applications/cc-switch-handler.desktop").exists())
+                        .map(|d| !d.join("applications/signal-switch-handler.desktop").exists())
                         .unwrap_or(true);
 
                     if should_register {
@@ -1193,7 +1184,7 @@ pub fn run() {
             // Linux（AppIndicator）不派发点击事件，只能出原生菜单，菜单里有一项打开面板。
             let native_menu = tray_panel::uses_native_menu();
             let mut tray_builder = TrayIconBuilder::with_id(tray::TRAY_ID)
-                .tooltip("CC Switch") // 鼠标悬停提示
+                .tooltip("Signal Switch") // 鼠标悬停提示
                 .on_tray_icon_event(|tray, event| {
                     if let TrayIconEvent::Click {
                         button:
@@ -2246,7 +2237,7 @@ fn show_database_init_error_dialog(
             Your data is NOT lost - the app will not delete the database automatically.\n\
             Common causes include: newer database version, corrupted file, permission issues, or low disk space.\n\n\
             Suggestions:\n\
-            1) Back up the entire config directory (including cc-switch.db)\n\
+            1) Back up the entire config directory (including signal-switch.db)\n\
             2) If you see “database version is newer”, please upgrade CC Switch\n\
             3) If this happened right after upgrading, consider rolling back to export/backup then upgrade again\n\n\
             Click 'Retry' to attempt initialization again\n\

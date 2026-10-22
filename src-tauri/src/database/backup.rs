@@ -512,7 +512,7 @@ impl Database {
     where
         F: FnOnce(&Path, &Path) -> Result<(), AppError>,
     {
-        let db_path = get_app_config_dir().join("cc-switch.db");
+        let db_path = get_app_config_dir().join("signal-switch.db");
         if !db_path.exists() {
             return Ok(None);
         }
@@ -533,7 +533,7 @@ impl Database {
         // discovery and retention only see the final path after the complete
         // SQLite image has been atomically published.
         let mut temp_path = Builder::new()
-            .prefix(".cc-switch-backup-")
+            .prefix(".signal-switch-backup-")
             .suffix(".tmp")
             .tempfile_in(&backup_dir)
             .map_err(|e| AppError::io(&backup_dir, e))?
@@ -1201,9 +1201,9 @@ mod tests {
             // Prevent the Windows legacy-HOME fallback without mutating HOME:
             // an existing default DB keeps get_app_config_dir() anchored under
             // CC_SWITCH_TEST_HOME and makes import exercise its safety backup.
-            let config_dir = temp_dir.path().join(".cc-switch");
+            let config_dir = temp_dir.path().join(".signal-switch");
             std::fs::create_dir_all(&config_dir).expect("create isolated config directory");
-            std::fs::File::create(config_dir.join("cc-switch.db"))
+            std::fs::File::create(config_dir.join("signal-switch.db"))
                 .expect("create isolated database sentinel");
             let guard = Self {
                 previous_test_home,
@@ -2514,7 +2514,7 @@ mod tests {
                 entry
                     .file_name()
                     .to_string_lossy()
-                    .starts_with(".cc-switch-backup-")
+                    .starts_with(".signal-switch-backup-")
             })
             .count();
         assert_eq!(

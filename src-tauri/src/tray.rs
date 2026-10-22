@@ -31,7 +31,7 @@ const TEMPLATE_TYPE_OFFICIAL_SUBSCRIPTION: &str = "official_subscription";
 /// Copilot 用量结果的单位（`commands::provider` 的 `COPILOT_UNIT_PREMIUM`）：高级请求次数。
 const COPILOT_UNIT_PREMIUM: &str = "requests";
 
-pub const TRAY_ID: &str = "cc-switch";
+pub const TRAY_ID: &str = "signal-switch";
 
 /// 进托盘的应用，顺序和侧栏一致。累加式应用没有「当前供应商」，不进托盘。
 pub const TRAY_APPS: [AppType; 5] = [
@@ -3318,7 +3318,7 @@ mod tests {
 
     #[test]
     fn tray_id_is_unique_to_app() {
-        assert_eq!(TRAY_ID, "cc-switch");
+        assert_eq!(TRAY_ID, "signal-switch");
         assert_ne!(TRAY_ID, "main");
     }
 

@@ -1,6 +1,6 @@
 # Signal Switch — brief e checkpoint inicial
 
-Data: 2026-10-21. Estado: **fork GitHub criado; bootstrap documental; sem migração de código**.
+Data: 2026-10-21. Estado: **identidade própria em implementação; não compilado/instalado; sem migração de código SignalRout**.
 
 ## Missão
 
@@ -89,3 +89,21 @@ Fontes consultadas:
 ## Próxima fatia exata
 
 Recuperar o SignalRout em fonte durável e comparar um único fluxo crítico (preferencialmente SSE/Responses ou lifecycle OAuth) contra o CC Switch antes de alterar o proxy. O fork GitHub já existe.
+
+## Checkpoint de identidade e distribuição (2026-10-21)
+
+- Em andamento: nome Signal Switch, bundle ID `io.github.luigiapcppereira.signalswitch`, package Cargo/JS, URL scheme `signalswitch://`, autostart/tray independentes.
+- Diretório de dados default: `~/.signal-switch/`; arquivos `signal-switch.db`, configurações e snapshots próprios. Configurações de Claude/Codex/OpenCode são **externas e compartilhadas por design**: ativar o proxy ou trocar provedores modifica o cliente; não executar isso automaticamente para migração.
+- Auto-updater upstream desabilitado, sem chave do fork: atualização manual até configurar assinatura e feed próprios. O painel de update poderá informar indisponibilidade.
+- Sync remoto default: `signal-switch-sync`, evitando compartilhamento acidental do remote root do CC Switch.
+- Ícones e textos legados ainda podem representar o CC Switch; rebranding gráfico é fase posterior. Nenhuma migração automática de `~/.cc-switch`.
+- Integração de releases Linux pendente de build/validação no host; não publicar artefatos antes de validar dependências e startup.
+
+## Checkpoint de validação — 2026-10-22
+
+- Auditado o caminho real de banco (`database/mod.rs`, `database/backup.rs`, `config.rs`): as rotinas de inicialização, backup e fallback do Signal Switch usam agora `signal-switch.db`, dentro do diretório próprio. Também foi corrigida a nomenclatura de backups legados e testes relacionados.
+- ACL `updater:default` removida, dependência updater removida, endpoint/chave upstream ausentes e comandos de atualização fail-closed. A interface informa que a atualização automática não está configurada; não distribuir atualizador até existir chave própria e canal assinado.
+- Frontend: `pnpm typecheck` passou e `pnpm build:renderer` passou; o bundler informou apenas avisos de chunks grandes. `cargo fmt --manifest-path src-tauri/Cargo.toml --all` executado; `git diff --check` passou.
+- Compilação Release iniciada em `fish -lc 'pnpm tauri build --no-bundle'`; log de compilação no host: `/tmp/signal-switch-release-build.log`, sessão da ferramenta: `29390`. O término, resultado de compilação Rust, testes Rust e instalação **não estavam confirmados** no momento deste registro.
+- **Não iniciar aplicativo em conjunto com CC Switch** sem revisar a escrita compartilhada das configurações de clientes Claude/Codex. Dados privados Signal Switch separados, mas os CLIs permanecem recursos externos compartilhados por projeto.
+- Próxima ação exata: reconciliar o estado do build Release na sessão/log, corrigir se houver erro, validar binário e fazer smoke test antes de instalar desktop entry local. Não supor que a sessão de build continua viva entre conversas.
